@@ -1,0 +1,52 @@
+version: "3.11"
+
+services:
+  #DO NOT use DB containers in production
+  #This container is here only to simplify development
+  db:
+    image: postgres:15
+    container_name: db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ~/.pg/pg_data/dev:/var/lib/postgresql/data
+    env_file:
+      - .env
+  django_shop:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: django_shop:latest
+    container_name: django_shop
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/django_shop/static
+      - media_volume:/django_shop/media
+    environment:
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_PASSWORD=pass123
+      - DJANGO_SUPERUSER_EMAIL=admin@example.com
+    env_file:
+      - .env
+    command: >
+      bash -c "python3 manage.py collectstatic --noinput && python3 manage.py makemigrations --noinput && python3 manage.py migrate --noinput && python manage.py createsuperuser --noinput && gunicorn -b 0.0.0.0:8000 shop_app.wsgi:application"
+  nginx:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./docker/nginx/
+    container_name: shop_app_nginx
+    image: shop_app_nginx
+    volumes:
+      - static_volume:/django_shop/static
+      - media_volume:/django_shop/media
+    depends_on:
+      - django_shop
+    ports:
+      - "${NGINX_EXTERNAL_PORT}:80"
+
+volumes:
+  static_volume:
+  media_volume:

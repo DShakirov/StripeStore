@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+  <title>Store</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <h1>Товары</h1>
+  <div id="items-container"></div>
+  <h2>Корзина</h2>
+  <div id="cart-container"></div>
+  <h2>Оплатить</h2>
+  <form id="checkout-form">
+      <div class="ui input">
+          <input type="text" name="cardNumber" placeholder="Номер карты">
+        </div>
+        <br>
+        <div class="ui input">
+          <input type="text" name="cardExpiry" placeholder="Срок действия (мм/гг)">
+        </div>
+        <br>
+        <div class="ui input">
+          <input type="text" name="cardCvc" placeholder="CVC">
+        </div>
+    <button type="submit">Pay</button>
+  </form>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>
